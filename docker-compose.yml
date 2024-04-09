@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  php-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: imgurl-pro:lastest
+    container_name: ImgURL-Pro
+    volumes:
+      - ./imgs:/var/www/html/imgs
+      - ./upload:/var/www/html/upload
+      - ./config.php:/var/www/html/config.php
+      - ./db.config.php:/var/www/html/db.config.php
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - tunnel
+
+  redis:
+    container_name: ImgURL-Pro-Redis
+    image: redis:latest
+    volumes:
+      - ./redis:/data
+    restart: unless-stopped
+  
+  tunnel:
+    container_name: ImgURL-Pro-Tunnel
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=token
